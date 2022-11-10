@@ -1,0 +1,24 @@
+---
+- name: Configure tcp_tw_recycle & tcp_tw_reuse
+  hosts: all
+  gather_facts: false
+  become: true
+
+  vars:
+    recycle_path: "/proc/sys/net/ipv4/tcp_tw_recycle"
+    reuse_path: "/proc/sys/net/ipv4/tcp_tw_reuse"
+    sysctl_location: "/etc/sysctl.conf"
+    sysctl_settings:
+      net.ipv4.tcp_tw_recycle: '0'
+      net.ipv4.tcp_tw_reuse: '0'
+
+  tasks:
+    - name: Change multiple sysctl settings
+      sysctl:
+        name: '{{ item.key }}'
+        value: '{{ item.value }}'
+        sysctl_set: yes
+        state: present
+        sysctl_file: '{{ sysctl_location }}'
+        reload: yes
+      with_dict: '{{ sysctl_settings }}'
